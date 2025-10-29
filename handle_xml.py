@@ -4,12 +4,11 @@ import xml.etree.ElementTree as ET
 import os
 
 DB_FILE = 'database.db'
-XML_FILE = 'data.xml'
+XML_FILE = os.path.join("data_import", 'data.xml')
 
 def parse_xml():
     if not os.path.exists(XML_FILE):
-        print(f"XML file '{XML_FILE}' not found!")
-        exit(1)
+        return f"Error: XML file '{XML_FILE}' not found!"
     
     tree = ET.parse(XML_FILE)
     root = tree.getroot()
@@ -28,21 +27,32 @@ def parse_xml():
 
 def insert_data(connection, data):
     cursor = connection.cursor()
-    for row in data:
-        cursor.execute( # ID is auto-incremented in DB
-            """
-            INSERT INTO Products (name, price, amount, description) VALUES (?, ?, ?, ?)
-            ON CONFLICT(name) DO UPDATE SET
-                price = excluded.price,
-                amount = excluded.amount,
-                description = excluded.description
-            """,
-            (row['name'], row['price'], row['amount'], row['description'])
-        )
-    connection.commit()
+    try:
+        for row in data:
+            cursor.execute( # ID is auto-incremented in DB
+                """
+                INSERT INTO Products (name, price, amount, description) VALUES (?, ?, ?, ?)
+                ON CONFLICT(name) DO UPDATE SET
+                    price = excluded.price,
+                    amount = excluded.amount,
+                    description = excluded.description
+                """,
+                (row['name'], row['price'], row['amount'], row['description'])
+            )
+        connection.commit()
+    except db.Error as e:
+        return f"Error: {e}"
 
 def do_xml_update():
     data = parse_xml()
+    if data.startswith("Error"):
+        return f"XML data import failed. {data}"
+    
     conn = db.connect(DB_FILE)
-    insert_data(conn, data)
+    result = insert_data(conn, data)
     conn.close()
+
+    if result.startswith("Error"):
+        return f"XML data import failed. {result}"
+    
+    return "XML data import successful."
