@@ -2,14 +2,16 @@ import pandas as pd
 import sqlite3 as db
 import xml.etree.ElementTree as ET
 import os
+import event_logging as log
 
 DB_FILE = 'database.db'
 XML_FILE = os.path.join("data_import", 'products.xml')
 
 def parse_xml():
     if not os.path.exists(XML_FILE):
+        log.log_import_event('XML', 'ERROR', 'File not found')
         return None
-    
+
     tree = ET.parse(XML_FILE)
     root = tree.getroot()
     data = []
@@ -39,6 +41,7 @@ def insert_data(connection, data):
             """,
             (row['name'], row['price'], row['amount'], row['description'])
         )
+        log.log_import_event('XML', 'INFO', f"Inserted/Updated row: {row['name']}")
     connection.commit()
 
 def do_xml_update():
@@ -53,4 +56,5 @@ def do_xml_update():
         return "XML data import successful."
     
     except Exception as e:
+        log.log_import_event('XML', 'ERROR', f"XML data import failed: {e}")
         return f"XML data import failed: {e}"

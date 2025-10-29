@@ -1,12 +1,14 @@
 import pandas as pd
 import sqlite3 as db
 import os
+import event_logging as log
 
 DB_FILE = 'database.db'
 CSV_FILE = os.path.join("data_import", 'customers.csv')
 
 def parse_csv():
     if not os.path.exists(CSV_FILE):
+        log.log_import_event('CSV', 'ERROR', 'File not found')
         return None
     
     df = pd.read_csv(CSV_FILE, sep=';')
@@ -34,6 +36,7 @@ def insert_data(connection, data):
             """,
             (row['name'], row['location'], row['currency'])
         )
+        log.log_import_event('CSV', 'INFO', f"Inserted/Updated row: {row['name']}")
     connection.commit()
 
 def do_csv_update():
@@ -48,4 +51,5 @@ def do_csv_update():
         return "CSV data import successful."
     
     except Exception as e:
+        log.log_import_event('CSV', 'ERROR', f"CSV data import failed: {e}")
         return f"CSV data import failed: {e}"
