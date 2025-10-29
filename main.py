@@ -1,5 +1,5 @@
-import modules
+from modules import handle_xml, handle_csv
 
 if __name__ == "__main__":
-    print(modules.handle_xml.do_xml_update())
-    print(modules.handle_csv.do_csv_update())
+    print(handle_xml.do_xml_update())
+    print(handle_csv.do_csv_update())

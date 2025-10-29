@@ -10,7 +10,7 @@ def log_import_event(import_type, event_type, message):
     if event_type not in ['INFO', 'ERROR', 'WARNING']:
         return
     
-    log = f"DATE - {datetime.datetime.now()} | IMPORT - {import_type} | MESSAGE - {message}"
+    log = f" DATE - {datetime.datetime.now()} | IMPORT - {import_type} | MESSAGE - {message}"
     match event_type:
         case 'INFO':
             logging.info(log)
