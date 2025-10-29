@@ -2,7 +2,7 @@ import pandas as pd
 import sqlite3 as db
 import xml.etree.ElementTree as ET
 import os
-import event_logging as log
+from . import event_logging as log
 
 DB_FILE = 'database.db'
 XML_FILE = os.path.join("data_import", 'products.xml')

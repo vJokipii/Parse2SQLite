@@ -1,7 +1,7 @@
 import pandas as pd
 import sqlite3 as db
 import os
-import event_logging as log
+from . import event_logging as log
 
 DB_FILE = 'database.db'
 CSV_FILE = os.path.join("data_import", 'customers.csv')
