@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<products>
+    <product>
+        <id>1</id>
+        <name>Apple</name>
+        <price>0.5</price>
+        <amount>100</amount>
+        <description>Fresh red apple</description>
+    </product>
+    <product>
+        <id>2</id>
+        <name>Banana</name>
+        <price>0.3</price>
+        <amount>150</amount>
+        <description>Ripe banana</description>
+    </product>
+</products>
