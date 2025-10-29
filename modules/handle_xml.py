@@ -8,18 +8,19 @@ XML_FILE = os.path.join("data_import", 'data.xml')
 
 def parse_xml():
     if not os.path.exists(XML_FILE):
-        return f"Error: XML file '{XML_FILE}' not found!"
+        return None
     
     tree = ET.parse(XML_FILE)
     root = tree.getroot()
     data = []
     for product in root.findall('product'):
+        if product.find('name') is None:
+            continue # Name is mandatory information
         item = {
-            'id': product.find('id').text,
             'name': product.find('name').text,
-            'price': product.find('price').text,
-            'amount': product.find('amount').text,
-            'description': product.find('description').text
+            'price': float(product.find('price').text) if product.find('price') is not None else 0.0,
+            'amount': int(product.find('amount').text) if product.find('amount') is not None else 0,
+            'description': product.find('description').text if product.find('description') is not None else ''
         }
         data.append(item)
     return data
@@ -27,32 +28,29 @@ def parse_xml():
 
 def insert_data(connection, data):
     cursor = connection.cursor()
-    try:
-        for row in data:
-            cursor.execute( # ID is auto-incremented in DB
-                """
-                INSERT INTO Products (name, price, amount, description) VALUES (?, ?, ?, ?)
-                ON CONFLICT(name) DO UPDATE SET
-                    price = excluded.price,
-                    amount = excluded.amount,
-                    description = excluded.description
-                """,
-                (row['name'], row['price'], row['amount'], row['description'])
-            )
-        connection.commit()
-    except db.Error as e:
-        return f"Error: {e}"
+    for row in data:
+        cursor.execute( # ID is auto-incremented in DB
+            """
+            INSERT INTO Products (name, price, amount, description) VALUES (?, ?, ?, ?)
+            ON CONFLICT(name) DO UPDATE SET
+                price = excluded.price,
+                amount = excluded.amount,
+                description = excluded.description
+            """,
+            (row['name'], row['price'], row['amount'], row['description'])
+        )
+    connection.commit()
 
 def do_xml_update():
-    data = parse_xml()
-    if data.startswith("Error"):
-        return f"XML data import failed. {data}"
+    try:
+        data = parse_xml()
+        if data is None:
+            return f"XML data import failed: file not found."
+        
+        with db.connect(DB_FILE) as conn:
+            insert_data(conn, data)
+        
+        return "XML data import successful."
     
-    conn = db.connect(DB_FILE)
-    result = insert_data(conn, data)
-    conn.close()
-
-    if result.startswith("Error"):
-        return f"XML data import failed. {result}"
-    
-    return "XML data import successful."
+    except Exception as e:
+        return f"XML data import failed: {e}"
