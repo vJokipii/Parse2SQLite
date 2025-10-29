@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 import os
 
 DB_FILE = 'database.db'
-XML_FILE = os.path.join("data_import", 'data.xml')
+XML_FILE = os.path.join("data_import", 'products.xml')
 
 def parse_xml():
     if not os.path.exists(XML_FILE):
