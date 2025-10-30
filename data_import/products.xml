@@ -3,7 +3,7 @@
     <product>
         <name>Apple</name>
         <price>0.5</price>
-        <amount>100</amount>
+        <amount>150</amount>
         <description>Fresh red apple</description>
     </product>
     <product>
